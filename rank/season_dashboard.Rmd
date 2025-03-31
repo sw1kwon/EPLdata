@@ -1,0 +1,91 @@
+---
+title: "EPL Season Report"
+author: "Soonwon KWON"
+date: "`r Sys.Date()`"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: scroll
+    theme: flatly
+params:
+  season: "9293"
+  type: "All"    # All, Home, Away
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(DT)
+
+base_url <- "https://raw.githubusercontent.com/sw1kwon/EPLdata/refs/heads/main/rank/"
+
+csv_file <- paste0("rank_", params$season, params$type, ".csv")
+full_url <- paste0(base_url, csv_file)
+
+df <- read.csv(full_url)
+
+str(df)
+```
+
+### Column {data-width=500}
+-----------------------------------------------------------------------
+
+### 🏆 Full Standings Table
+
+```{r}
+datatable(df, options = list(pageLength = 10, scrollX = TRUE))
+```
+
+---
+
+### Column {data-width=500}
+-----------------------------------------------------------------------
+
+### 🔝 Top 5 Teams by Points
+
+```{r}
+library(plotly)
+
+top_n <- df %>% 
+  arrange(desc(Points)) %>% 
+  slice_head(n = 5)
+
+p1 <- ggplot(top_n, aes(x = reorder(Team, Points), y = Points,
+                        fill = Team,
+                        text = paste0(
+                          "Won: ", Won, ", Drawn: ", Drawn, ", Lost: ", Lost, "<br>",
+                          "GF: ", GF, ", GA: ", GA, "<br>",
+                          "GD: ", GD
+                        ))) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = Points), hjust = -0.2, size = 4) +
+  coord_flip() +
+  labs(title = paste("Top 5 Teams -", params$season, params$type),
+       x = "Team", y = "Points") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+ggplotly(p1, tooltip = "text")
+```
+
+---
+
+### ⚽ Points vs Goal Difference
+
+```{r}
+p2 <- ggplot(df, aes(x = GD, y = Points,
+                     color = Pos,
+                     text = paste0(
+                       "Team: ", Team, "<br>",
+                       "Pos: ", Pos, " | Points: ", Points, "<br>",
+                       "GF: ", GF, ", GA: ", GA, " | GD: ", GD
+                     ))) +
+  geom_point(size = 3) +
+  scale_color_gradient(low = "darkorange", high = "skyblue") +
+  labs(
+    title = paste("Performance Overview -", params$season, params$type),
+    x = "Goal Difference (GD)", y = "Points (Pts)"
+  ) +
+  theme_minimal()
+
+ggplotly(p2, tooltip = "text")
+```
