@@ -31,7 +31,7 @@ This dashboard, written in R using **RMarkdown + Flexdashboard + Plotly**, provi
 
 - CSV data is loaded directly from GitHub using the `params$season` and `params$type` values.
 - If the dataset does not contain the `GD` (Goal Difference) column, it is automatically calculated as `GF - GA`.
-- 
+
 ## Dashboard Layout
 
 The dashboard consists of two columns:
