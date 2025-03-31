@@ -23,10 +23,12 @@ full_url <- paste0(base_url, csv_file)
 
 df <- read.csv(full_url)
 
+
 # GD (Goal Difference)
 if (!"GD" %in% names(df) & all(c("GF", "GA") %in% names(df))) {
   df <- df %>% mutate(GD = GF - GA)
 }
+
 
 str(df)
 ```
